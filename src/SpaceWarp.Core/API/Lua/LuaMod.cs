@@ -2,177 +2,179 @@
 using KSP.Game;
 using MoonSharp.Interpreter;
 using SpaceWarp.API.Logging;
+using System;
 
-namespace SpaceWarp.API.Lua;
-
-/// <summary>
-/// A Lua mod, this is the base class for all mods that are written in Lua.
-/// </summary>
-[MoonSharpUserData]
-[PublicAPI]
-public class LuaMod : KerbalMonoBehaviour
+namespace SpaceWarp.API.Lua
 {
     /// <summary>
-    /// The table that contains the mod's functions.
+    /// A Lua mod, this is the base class for all mods that are written in Lua.
     /// </summary>
-    public Table ModTable;
-    // TODO: Add more than just this to the behaviour but for now
-
-    #region Message Definitions
-    // Start
-    private Closure _start;
-
-    // Update Functions
-    private Closure _update;
-    private Closure _fixedUpdate;
-    private Closure _lateUpdate;
-
-    // Enable/Disable
-    private Closure _onEnable;
-    private Closure _onDisable;
-
-    // Destruction
-    private Closure _onDestroy;
-
-    // Reset
-    private Closure _reset;
-    #endregion
-
-    /// <summary>
-    /// The logger for this mod.
-    /// </summary>
-    public ILogger Logger;
-
-    /// <summary>
-    /// A pass through to the wrapped table
-    /// </summary>
-    /// <param name="idx">The index of the name.</param>
-    public DynValue this[DynValue idx]
+    [MoonSharpUserData]
+    [PublicAPI]
+    public class LuaMod : KerbalMonoBehaviour
     {
-        get => ModTable.Get(idx);
-        set => ModTable[idx] = value;
-    }
+        /// <summary>
+        /// The table that contains the mod's functions.
+        /// </summary>
+        public Table ModTable;
+        // TODO: Add more than just this to the behaviour but for now
 
-    private void TryCallMethod(Closure closure, params object[] args)
-    {
-        try
-        {
-            closure.Call(args);
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e);
-        }
-    }
-    #region Message Handlers
+        #region Message Definitions
+        // Start
+        private Closure _start;
 
-    private void TryRegister(string methodName, out Closure method)
-    {
-        if (ModTable.Get(methodName) != null && ModTable.Get(methodName).Type == DataType.Function)
-        {
-            method = ModTable.Get(methodName).Function;
-            return;
-        }
-        method = null;
-    }
+        // Update Functions
+        private Closure _update;
+        private Closure _fixedUpdate;
+        private Closure _lateUpdate;
 
-    private void Awake()
-    {
-        if (ModTable.Get("Awake") != null && ModTable.Get("Awake").Type == DataType.Function)
+        // Enable/Disable
+        private Closure _onEnable;
+        private Closure _onDisable;
+
+        // Destruction
+        private Closure _onDestroy;
+
+        // Reset
+        private Closure _reset;
+        #endregion
+
+        /// <summary>
+        /// The logger for this mod.
+        /// </summary>
+        public ILogger Logger;
+
+        /// <summary>
+        /// A pass through to the wrapped table
+        /// </summary>
+        /// <param name="idx">The index of the name.</param>
+        public DynValue this[DynValue idx]
         {
-            var awakeFunction = ModTable.Get("Awake").Function;
-            TryCallMethod(awakeFunction);
+            get => ModTable.Get(idx);
+            set => ModTable[idx] = value;
         }
 
-        TryRegister(nameof(Start),out _start);
-
-        TryRegister(nameof(Update), out _update);
-
-        TryRegister(nameof(LateUpdate), out _lateUpdate);
-
-        TryRegister(nameof(FixedUpdate), out _fixedUpdate);
-
-        TryRegister(nameof(OnEnable), out _onEnable);
-
-        TryRegister(nameof(OnDisable), out _onDisable);
-
-        TryRegister(nameof(OnDestroy), out _onDestroy);
-
-        TryRegister(nameof(Reset), out _reset);
-
-    }
-
-    // Start
-    private void Start()
-    {
-        if (_start != null)
+        private void TryCallMethod(Closure closure, params object[] args)
         {
-            TryCallMethod(_start, this);
+            try
+            {
+                closure.Call(args);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
+            }
         }
-    }
+        #region Message Handlers
 
-    // Update Functions
-
-    private void Update()
-    {
-        if (_update != null)
+        private void TryRegister(string methodName, out Closure method)
         {
-            TryCallMethod(_update, this);
+            if (ModTable.Get(methodName) != null && ModTable.Get(methodName).Type == DataType.Function)
+            {
+                method = ModTable.Get(methodName).Function;
+                return;
+            }
+            method = null;
         }
-    }
 
-    private void FixedUpdate()
-    {
-        if (_fixedUpdate != null)
+        private void Awake()
         {
-            TryCallMethod(_fixedUpdate, this);
-        }
-    }
+            if (ModTable.Get("Awake") != null && ModTable.Get("Awake").Type == DataType.Function)
+            {
+                var awakeFunction = ModTable.Get("Awake").Function;
+                TryCallMethod(awakeFunction);
+            }
 
-    private void LateUpdate()
-    {
-        if (_lateUpdate != null)
+            TryRegister(nameof(Start), out _start);
+
+            TryRegister(nameof(Update), out _update);
+
+            TryRegister(nameof(LateUpdate), out _lateUpdate);
+
+            TryRegister(nameof(FixedUpdate), out _fixedUpdate);
+
+            TryRegister(nameof(OnEnable), out _onEnable);
+
+            TryRegister(nameof(OnDisable), out _onDisable);
+
+            TryRegister(nameof(OnDestroy), out _onDestroy);
+
+            TryRegister(nameof(Reset), out _reset);
+
+        }
+
+        // Start
+        private void Start()
         {
-            TryCallMethod(_lateUpdate, this);
+            if (_start != null)
+            {
+                TryCallMethod(_start, this);
+            }
         }
-    }
 
-    // Enable/Disable
+        // Update Functions
 
-    private void OnEnable()
-    {
-        if (_onEnable != null)
+        private void Update()
         {
-            TryCallMethod(_onEnable, this);
+            if (_update != null)
+            {
+                TryCallMethod(_update, this);
+            }
         }
-    }
 
-    private void OnDisable()
-    {
-        if (_onDisable != null)
+        private void FixedUpdate()
         {
-            TryCallMethod(_onDisable, this);
+            if (_fixedUpdate != null)
+            {
+                TryCallMethod(_fixedUpdate, this);
+            }
         }
-    }
 
-    // Destruction
-
-    private void OnDestroy()
-    {
-        if (_onDestroy != null)
+        private void LateUpdate()
         {
-            TryCallMethod(_onDestroy, this);
+            if (_lateUpdate != null)
+            {
+                TryCallMethod(_lateUpdate, this);
+            }
         }
-    }
 
-    // Reset
-    private void Reset()
-    {
-        if (_reset != null)
+        // Enable/Disable
+
+        private void OnEnable()
         {
-            TryCallMethod(_reset, this);
+            if (_onEnable != null)
+            {
+                TryCallMethod(_onEnable, this);
+            }
         }
-    }
 
-    #endregion
+        private void OnDisable()
+        {
+            if (_onDisable != null)
+            {
+                TryCallMethod(_onDisable, this);
+            }
+        }
+
+        // Destruction
+
+        private void OnDestroy()
+        {
+            if (_onDestroy != null)
+            {
+                TryCallMethod(_onDestroy, this);
+            }
+        }
+
+        // Reset
+        private void Reset()
+        {
+            if (_reset != null)
+            {
+                TryCallMethod(_reset, this);
+            }
+        }
+
+        #endregion
+    }
 }

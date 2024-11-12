@@ -1,0 +1,25 @@
+{
+    "name": "SpaceWarp.Core",
+    "rootNamespace": "",
+    "references": [
+        "GUID:51c8c0e0eb56116468d6e4a4f3cb65ae",
+        "GUID:9e24947de15b9834991c9d8411ea37cf",
+        "GUID:84651a3751eca9349aac36a66bba901b",
+        "GUID:5b997c0536761db47a3861d2ba642df4"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Assembly-CSharp.dll",
+        "Newtonsoft.Json.dll",
+        "BepInEx.dll",
+        "Mono.Cecil.dll",
+        "0Harmony.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

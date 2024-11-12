@@ -1,36 +1,37 @@
 using BepInEx.Configuration;
 
-namespace SpaceWarp.API.Configuration;
-
-/// <summary>
-/// Base class for value constraints.
-/// </summary>
-/// <typeparam name="T">Type of the value.</typeparam>
-public abstract class ValueConstraint<T> : IValueConstraint
+namespace SpaceWarp.API.Configuration
 {
     /// <summary>
-    /// Returns true if the given value is valid for this constraint.
+    /// Base class for value constraints.
     /// </summary>
-    /// <param name="o">Value to check.</param>
-    /// <returns>True if the value is valid, false otherwise.</returns>
-    public abstract bool IsValid(T o);
-
-    /// <summary>
-    /// Returns true if the given value is valid for this constraint.
-    /// </summary>
-    /// <param name="o">Value to check.</param>
-    /// <returns>True if the value is valid, false otherwise.</returns>
-    public bool IsValid(object o)
+    /// <typeparam name="T">Type of the value.</typeparam>
+    public abstract class ValueConstraint<T> : IValueConstraint
     {
-        return IsValid((T)o);
-    }
+        /// <summary>
+        /// Returns true if the given value is valid for this constraint.
+        /// </summary>
+        /// <param name="o">Value to check.</param>
+        /// <returns>True if the value is valid, false otherwise.</returns>
+        public abstract bool IsValid(T o);
 
-    /// <inheritdoc />
-    public bool IsConstrained(object o)
-    {
-        return IsValid((T)o);
-    }
+        /// <summary>
+        /// Returns true if the given value is valid for this constraint.
+        /// </summary>
+        /// <param name="o">Value to check.</param>
+        /// <returns>True if the value is valid, false otherwise.</returns>
+        public bool IsValid(object o)
+        {
+            return IsValid((T)o);
+        }
 
-    /// <inheritdoc />
-    public abstract AcceptableValueBase ToAcceptableValueBase();
+        /// <inheritdoc />
+        public bool IsConstrained(object o)
+        {
+            return IsValid((T)o);
+        }
+
+        /// <inheritdoc />
+        public abstract AcceptableValueBase ToAcceptableValueBase();
+    }
 }

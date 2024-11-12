@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using HarmonyLib;
 using KSP.Game;
 using KSP.Modules;
@@ -9,93 +10,93 @@ using SpaceWarp.API.Logging;
 using UnityEngine;
 using ILogger = SpaceWarp.API.Logging.ILogger;
 
-namespace SpaceWarp.Patching.Parts;
-
-/// <summary>
-/// This patch is meant to give modders a way to use the new colors system on KSP2.
-/// The patch will replace any renderer that has a "Parts Replace" or a "KSP2/Parts/Paintable" shader on it.
-/// It will copy all its values onto the new material, including the material name.
-/// Note: "Parts Replace" is obsolete and might be deleted in a later version.
-/// Patch created by LuxStice.
-/// </summary>
-[HarmonyPatch]
-internal class ColorsPatch
+namespace SpaceWarp.Patching.Parts
 {
-    #region Colors patch
-
-    private const string Ksp2OpaquePath = "KSP2/Scenery/Standard (Opaque)";
-
-    [HarmonyPatch(typeof(ObjectAssemblyPartTracker), nameof(ObjectAssemblyPartTracker.OnPartPrefabLoaded))]
-    public static void Prefix(IObjectAssemblyAvailablePart obj, ref GameObject prefab)
+    /// <summary>
+    /// This patch is meant to give modders a way to use the new colors system on KSP2.
+    /// The patch will replace any renderer that has a "Parts Replace" or a "KSP2/Parts/Paintable" shader on it.
+    /// It will copy all its values onto the new material, including the material name.
+    /// Note: "Parts Replace" is obsolete and might be deleted in a later version.
+    /// Patch created by LuxStice.
+    /// </summary>
+    [HarmonyPatch]
+    internal class ColorsPatch
     {
-        foreach (var renderer in prefab.GetComponentsInChildren<Renderer>(true))
+        #region Colors patch
+
+        private const string Ksp2OpaquePath = "KSP2/Scenery/Standard (Opaque)";
+
+        [HarmonyPatch(typeof(ObjectAssemblyPartTracker), nameof(ObjectAssemblyPartTracker.OnPartPrefabLoaded))]
+        public static void Prefix(IObjectAssemblyAvailablePart obj, ref GameObject prefab)
         {
-            var shaderName = renderer.material.shader.name;
-            if (shaderName is not ("Parts Replace" or "KSP2/Parts/Paintable"))
+            foreach (var renderer in prefab.GetComponentsInChildren<Renderer>(true))
             {
-                continue;
+                var shaderName = renderer.material.shader.name;
+                if (shaderName is not ("Parts Replace" or "KSP2/Parts/Paintable"))
+                {
+                    continue;
+                }
+
+                Material material;
+                var mat = new Material(Shader.Find(Ksp2OpaquePath))
+                {
+                    name = (material = renderer.material).name
+                };
+                mat.CopyPropertiesFromMaterial(material);
+                renderer.material = mat;
             }
-
-            Material material;
-            var mat = new Material(Shader.Find(Ksp2OpaquePath))
-            {
-                name = (material = renderer.material).name
-            };
-            mat.CopyPropertiesFromMaterial(material);
-            renderer.material = mat;
         }
-    }
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(SimulationObjectView), nameof(SimulationObjectView.InitializeView))]
-    public static void UpdateColorsInFlight(GameObject instance)
-    {
-        foreach (var renderer in instance.GetComponentsInChildren<Renderer>(true))
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SimulationObjectView), nameof(SimulationObjectView.InitializeView))]
+        public static void UpdateColorsInFlight(GameObject instance)
         {
-            var shaderName = renderer.material.shader.name;
-            if (shaderName is not ("Parts Replace" or "KSP2/Parts/Paintable"))
+            foreach (var renderer in instance.GetComponentsInChildren<Renderer>(true))
             {
-                continue;
+                var shaderName = renderer.material.shader.name;
+                if (shaderName is not ("Parts Replace" or "KSP2/Parts/Paintable"))
+                {
+                    continue;
+                }
+
+                Material material;
+                var mat = new Material(Shader.Find(Ksp2OpaquePath))
+                {
+                    name = (material = renderer.material).name
+                };
+                mat.CopyPropertiesFromMaterial(material);
+                renderer.material = mat;
             }
-
-            Material material;
-            var mat = new Material(Shader.Find(Ksp2OpaquePath))
-            {
-                name = (material = renderer.material).name
-            };
-            mat.CopyPropertiesFromMaterial(material);
-            renderer.material = mat;
         }
-    }
 
-    #endregion
+        #endregion
 
-    // TODO: Remove everything below this comment in 2.0.
+        // TODO: Remove everything below this comment in 2.0.
 
-    #region To be removed
+        #region To be removed
 
-    // ReSharper disable all
+        // ReSharper disable all
 
-    private const string Ksp2TransparentPath = "KSP2/Scenery/Standard (Transparent)";
-    private const string UnityStandard = "Standard";
+        private const string Ksp2TransparentPath = "KSP2/Scenery/Standard (Transparent)";
+        private const string UnityStandard = "Standard";
 
-    private const int Diffuse = 0;
-    private const int Metallic = 1;
-    private const int Bump = 2;
-    private const int Occlusion = 3;
-    private const int Emission = 4;
-    private const int PaintMap = 5;
+        private const int Diffuse = 0;
+        private const int Metallic = 1;
+        private const int Bump = 2;
+        private const int Occlusion = 3;
+        private const int Emission = 4;
+        private const int PaintMap = 5;
 
-    private const string DisplayName = "TTR"; //Taste the Rainbow - name by munix
-    private const bool LoadOnInit = true;
+        private const string DisplayName = "TTR"; //Taste the Rainbow - name by munix
+        private const bool LoadOnInit = true;
 
-    private static string[] _allParts;
+        private static string[] _allParts;
 
-    private static Dictionary<string, Texture[]> _partHash;
-    private static int[] _propertyIds;
+        private static Dictionary<string, Texture[]> _partHash;
+        private static int[] _propertyIds;
 
-    private static readonly string[] TextureSuffixes =
-    {
+        private static readonly string[] TextureSuffixes =
+        {
         "d.png",
         "m.png",
         "n.png",
@@ -104,8 +105,8 @@ internal class ColorsPatch
         "pm.png"
     };
 
-    private static readonly string[] TextureNames =
-    {
+        private static readonly string[] TextureNames =
+        {
         "diffuse",
         "metallic",
         "normal",
@@ -114,24 +115,24 @@ internal class ColorsPatch
         "paint map"
     };
 
-    private static Shader _ksp2Opaque;
-    private static Shader _ksp2Transparent;
-    private static Shader _unityStandard;
-    internal static ILogger Logger = BaseLogger.CreateDefault(DisplayName);
+        private static Shader _ksp2Opaque;
+        private static Shader _ksp2Transparent;
+        private static Shader _unityStandard;
+        internal static ILogger Logger = BaseLogger.CreateDefault(DisplayName);
 
-    public static Dictionary<string, string[]> DeclaredParts { get; } = new();
+        public static Dictionary<string, string[]> DeclaredParts { get; } = new();
 
-    [HarmonyPrepare]
-    private static bool Init(MethodBase original)
-    {
-        if (original is null)
+        [HarmonyPrepare]
+        private static bool Init(MethodBase original)
         {
-            return true;
-        }
+            if (original is null)
+            {
+                return true;
+            }
 
-        _partHash = new Dictionary<string, Texture[]>();
-        _propertyIds = new[]
-        {
+            _partHash = new Dictionary<string, Texture[]>();
+            _propertyIds = new[]
+            {
             Shader.PropertyToID("_MainTex"),
             Shader.PropertyToID("_MetallicGlossMap"),
             Shader.PropertyToID("_BumpMap"),
@@ -140,245 +141,246 @@ internal class ColorsPatch
             Shader.PropertyToID("_PaintMaskGlossMap")
         };
 
-        _ksp2Opaque = Shader.Find(Ksp2OpaquePath);
-        _ksp2Transparent = Shader.Find(Ksp2TransparentPath);
-        _unityStandard = Shader.Find(UnityStandard);
+            _ksp2Opaque = Shader.Find(Ksp2OpaquePath);
+            _ksp2Transparent = Shader.Find(Ksp2TransparentPath);
+            _unityStandard = Shader.Find(UnityStandard);
 
-        return true;
-    }
-
-    /// <summary>
-    ///     Adds <paramref name="partNameList" /> to internal parts list under <paramref name="modGuid" />
-    ///     allowing them to have the patch applied.
-    /// </summary>
-    /// <param name="modGuid">guid of the mod that owns the parts.</param>
-    /// <param name="partNameList">
-    ///     Collection of partNames. Names that end in XS, S, M, L or XL will be counted as the same
-    ///     part,
-    /// </param>
-    internal static void DeclareParts(string modGuid, params string[] partNameList)
-    {
-        DeclareParts(modGuid, partNameList.ToList());
-    }
-
-    /// <summary>
-    ///     Adds <paramref name="partNameList" /> to internal parts list under <paramref name="modGuid" />
-    ///     allowing them to have the patch applied.
-    /// </summary>
-    /// <param name="modGuid">guid of the mod that owns the parts.</param>
-    /// <param name="partNameList">
-    ///     Collection of partNames. Names that end in XS, S, M, L or XL will be counted as the same
-    ///     part.
-    /// </param>
-    internal static void DeclareParts(string modGuid, IEnumerable<string> partNameList)
-    {
-        if (DeclaredParts.ContainsKey(modGuid))
-        {
-            LogWarning($"{modGuid} tried to declare their parts twice. Ignoring second call.");
-            return;
+            return true;
         }
 
-        var nameList = partNameList as string[] ?? partNameList.ToArray();
-        if (!nameList.Any())
+        /// <summary>
+        ///     Adds <paramref name="partNameList" /> to internal parts list under <paramref name="modGuid" />
+        ///     allowing them to have the patch applied.
+        /// </summary>
+        /// <param name="modGuid">guid of the mod that owns the parts.</param>
+        /// <param name="partNameList">
+        ///     Collection of partNames. Names that end in XS, S, M, L or XL will be counted as the same
+        ///     part,
+        /// </param>
+        internal static void DeclareParts(string modGuid, params string[] partNameList)
         {
-            LogWarning($"{modGuid} tried to declare no parts. Ignoring this call.");
-            return;
+            DeclareParts(modGuid, partNameList.ToList());
         }
 
-        DeclaredParts.Add(modGuid, nameList.ToArray());
-    }
-
-    internal static Texture[] GetTextures(string partName)
-    {
-        if (_partHash.ContainsKey(partName))
-            return _partHash[partName];
-
-        LogError($"Requested textures from {partName} but part doesn't exist on declared parts!");
-        return null;
-    }
-
-    private static void LoadDeclaredParts()
-    {
-        List<string> allPartsTemp = new();
-
-        if (DeclaredParts.Count == 0)
+        /// <summary>
+        ///     Adds <paramref name="partNameList" /> to internal parts list under <paramref name="modGuid" />
+        ///     allowing them to have the patch applied.
+        /// </summary>
+        /// <param name="modGuid">guid of the mod that owns the parts.</param>
+        /// <param name="partNameList">
+        ///     Collection of partNames. Names that end in XS, S, M, L or XL will be counted as the same
+        ///     part.
+        /// </param>
+        internal static void DeclareParts(string modGuid, IEnumerable<string> partNameList)
         {
-            LogWarning("No parts were declared before load.");
-            return;
-        }
-
-        if (LoadOnInit)
-        {
-            foreach (var modGuid in DeclaredParts.Keys)
+            if (DeclaredParts.ContainsKey(modGuid))
             {
-                LoadTextures(modGuid);
-
-                allPartsTemp.AddRange(DeclaredParts[modGuid].Select(partName => TrimPartName(partName)));
-            }
-        }
-
-        _allParts = allPartsTemp.ToArray();
-    }
-
-    private static bool TryAddUnique(string partName)
-    {
-        if (_partHash.ContainsKey(partName))
-        {
-            return false;
-        }
-
-        _partHash.Add(partName, new Texture[6]);
-        return true;
-    }
-
-
-    private static void LoadTextures(string modGuid)
-    {
-        LogMessage($">Loading parts from {modGuid}");
-
-        foreach (var partName in DeclaredParts[modGuid])
-        {
-            LogMessage($"\t>Loading {partName}");
-            if (!TryAddUnique(partName))
-            {
-                LogWarning(
-                    $"{partName} already exists in hash map. Probably it already exists in another mod. Ignoring this part."); //this shows once per call... too much
-                continue;
-            }
-
-            var trimmedPartName = TrimPartName(partName);
-            var pathWithoutSuffix =
-                $"{modGuid.ToLower()}/images/{trimmedPartName.ToLower()}/{trimmedPartName.ToLower()}";
-
-
-            var count = 0; //already has diffuse
-            if (AssetManager.TryGetAsset($"{pathWithoutSuffix}_{TextureSuffixes[Diffuse]}", out Texture2D dTex))
-            {
-                _partHash[trimmedPartName][Diffuse] = dTex;
-                count++;
-                LogMessage($"\t\t>({count}/6) Loaded {TextureNames[Diffuse]} texture");
-            }
-            else
-            {
-                LogWarning($"{partName} doesn't have a diffuse texture. Skipping this part.");
+                LogWarning($"{modGuid} tried to declare their parts twice. Ignoring second call.");
                 return;
             }
 
-            for (int i = 1; i < _propertyIds.Length; i++)
+            var nameList = partNameList as string[] ?? partNameList.ToArray();
+            if (!nameList.Any())
             {
-                if (!AssetManager.TryGetAsset($"{pathWithoutSuffix}_{TextureSuffixes[i]}", out Texture2D tex)) continue;
+                LogWarning($"{modGuid} tried to declare no parts. Ignoring this call.");
+                return;
+            }
 
-                count++;
+            DeclaredParts.Add(modGuid, nameList.ToArray());
+        }
 
-                if (i == Bump) //Converting texture to Bump texture
+        internal static Texture[] GetTextures(string partName)
+        {
+            if (_partHash.ContainsKey(partName))
+                return _partHash[partName];
+
+            LogError($"Requested textures from {partName} but part doesn't exist on declared parts!");
+            return null;
+        }
+
+        private static void LoadDeclaredParts()
+        {
+            List<string> allPartsTemp = new();
+
+            if (DeclaredParts.Count == 0)
+            {
+                LogWarning("No parts were declared before load.");
+                return;
+            }
+
+            if (LoadOnInit)
+            {
+                foreach (var modGuid in DeclaredParts.Keys)
                 {
-                    var normalTexture = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false, true);
-                    Graphics.CopyTexture(tex, normalTexture);
-                    tex = normalTexture;
+                    LoadTextures(modGuid);
+
+                    allPartsTemp.AddRange(DeclaredParts[modGuid].Select(partName => TrimPartName(partName)));
+                }
+            }
+
+            _allParts = allPartsTemp.ToArray();
+        }
+
+        private static bool TryAddUnique(string partName)
+        {
+            if (_partHash.ContainsKey(partName))
+            {
+                return false;
+            }
+
+            _partHash.Add(partName, new Texture[6]);
+            return true;
+        }
+
+
+        private static void LoadTextures(string modGuid)
+        {
+            LogMessage($">Loading parts from {modGuid}");
+
+            foreach (var partName in DeclaredParts[modGuid])
+            {
+                LogMessage($"\t>Loading {partName}");
+                if (!TryAddUnique(partName))
+                {
+                    LogWarning(
+                        $"{partName} already exists in hash map. Probably it already exists in another mod. Ignoring this part."); //this shows once per call... too much
+                    continue;
                 }
 
-                _partHash[trimmedPartName][i] = tex;
-                LogMessage($"\t\t>({count}/6) Loaded {TextureNames[i]} texture");
+                var trimmedPartName = TrimPartName(partName);
+                var pathWithoutSuffix =
+                    $"{modGuid.ToLower()}/images/{trimmedPartName.ToLower()}/{trimmedPartName.ToLower()}";
+
+
+                var count = 0; //already has diffuse
+                if (AssetManager.TryGetAsset($"{pathWithoutSuffix}_{TextureSuffixes[Diffuse]}", out Texture2D dTex))
+                {
+                    _partHash[trimmedPartName][Diffuse] = dTex;
+                    count++;
+                    LogMessage($"\t\t>({count}/6) Loaded {TextureNames[Diffuse]} texture");
+                }
+                else
+                {
+                    LogWarning($"{partName} doesn't have a diffuse texture. Skipping this part.");
+                    return;
+                }
+
+                for (int i = 1; i < _propertyIds.Length; i++)
+                {
+                    if (!AssetManager.TryGetAsset($"{pathWithoutSuffix}_{TextureSuffixes[i]}", out Texture2D tex)) continue;
+
+                    count++;
+
+                    if (i == Bump) //Converting texture to Bump texture
+                    {
+                        var normalTexture = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false, true);
+                        Graphics.CopyTexture(tex, normalTexture);
+                        tex = normalTexture;
+                    }
+
+                    _partHash[trimmedPartName][i] = tex;
+                    LogMessage($"\t\t>({count}/6) Loaded {TextureNames[i]} texture");
+                }
+
+                if (count == 6)
+                    LogMessage($"\t\tWoW Much Textures!");
             }
-
-            if (count == 6)
-                LogMessage($"\t\tWoW Much Textures!");
         }
-    }
 
-    private static void SetTexturesToMaterial(string partName, ref Material material)
-    {
-        var trimmedPartName = TrimPartName(partName);
-        material.SetFloat("_MetallicGlossMap", 1f);
-        material.SetFloat("_Metallic", 1f);
-        material.SetFloat("_PaintGlossMapScale", 1f);
-        for (var i = 0; i < _propertyIds.Length; i++)
+        private static void SetTexturesToMaterial(string partName, ref Material material)
         {
-            var texture = _partHash[trimmedPartName][i];
-            if (texture is not null)
+            var trimmedPartName = TrimPartName(partName);
+            material.SetFloat("_MetallicGlossMap", 1f);
+            material.SetFloat("_Metallic", 1f);
+            material.SetFloat("_PaintGlossMapScale", 1f);
+            for (var i = 0; i < _propertyIds.Length; i++)
             {
-                material.SetTexture(_propertyIds[i], texture);
+                var texture = _partHash[trimmedPartName][i];
+                if (texture is not null)
+                {
+                    material.SetTexture(_propertyIds[i], texture);
+                }
             }
         }
-    }
 
-    private static string TrimPartName(string partName)
-    {
-        if (partName.Length < 3)
+        private static string TrimPartName(string partName)
         {
+            if (partName.Length < 3)
+            {
+                return partName;
+            }
+
+            if (partName.EndsWith("XS")
+                || partName.EndsWith("XL"))
+            {
+                return partName.Remove(partName.Length - 2, 2);
+            }
+
+            if (partName.EndsWith("S") || partName.EndsWith("M")
+                                       || partName.EndsWith("L"))
+            {
+                return partName.Remove(partName.Length - 1);
+            }
+
             return partName;
         }
 
-        if (partName.EndsWith("XS")
-            || partName.EndsWith("XL"))
+        [HarmonyPatch(typeof(GameManager),
+            nameof(GameManager.OnLoadingFinished))]
+        internal static void Prefix()
         {
-            return partName.Remove(partName.Length - 2, 2);
+            LoadDeclaredParts();
         }
 
-        if (partName.EndsWith("S") || partName.EndsWith("M")
-                                   || partName.EndsWith("L"))
+        [HarmonyPatch(typeof(Module_Color),
+            nameof(Module_Color.OnInitialize))]
+        internal static void Postfix(Module_Color __instance)
         {
-            return partName.Remove(partName.Length - 1);
-        }
+            var partName = __instance.OABPart is not null ? __instance.OABPart.PartName : __instance.part.Name;
+            if (string.IsNullOrEmpty(partName)) return;
+            var trimmedPartName = TrimPartName(partName);
+            if (DeclaredParts.Count <= 0 || !_allParts.Contains(trimmedPartName)) return;
 
-        return partName;
-    }
-
-    [HarmonyPatch(typeof(GameManager),
-        nameof(GameManager.OnLoadingFinished))]
-    internal static void Prefix()
-    {
-        LoadDeclaredParts();
-    }
-
-    [HarmonyPatch(typeof(Module_Color),
-        nameof(Module_Color.OnInitialize))]
-    internal static void Postfix(Module_Color __instance)
-    {
-        var partName = __instance.OABPart is not null ? __instance.OABPart.PartName : __instance.part.Name;
-        if (string.IsNullOrEmpty(partName)) return;
-        var trimmedPartName = TrimPartName(partName);
-        if (DeclaredParts.Count <= 0 || !_allParts.Contains(trimmedPartName)) return;
-
-        var mat = new Material(_ksp2Opaque)
-        {
-            name = __instance.GetComponentInChildren<MeshRenderer>().material.name
-        };
-
-        foreach (var renderer in __instance.GetComponentsInChildren<MeshRenderer>(true))
-        {
-            if (renderer.material.shader.name != _unityStandard.name)
+            var mat = new Material(_ksp2Opaque)
             {
-                continue;
+                name = __instance.GetComponentInChildren<MeshRenderer>().material.name
+            };
+
+            foreach (var renderer in __instance.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (renderer.material.shader.name != _unityStandard.name)
+                {
+                    continue;
+                }
+
+                SetTexturesToMaterial(trimmedPartName, ref mat);
+
+                renderer.material = mat;
+
+                if (renderer.material.shader.name != _ksp2Opaque.name)
+                {
+                    renderer.SetMaterial(mat); //Sometimes the material Set doesn't work, this seems to be more reliable.
+                }
             }
 
-            SetTexturesToMaterial(trimmedPartName, ref mat);
-
-            renderer.material = mat;
-
-            if (renderer.material.shader.name != _ksp2Opaque.name)
-            {
-                renderer.SetMaterial(mat); //Sometimes the material Set doesn't work, this seems to be more reliable.
-            }
+            __instance.SomeColorUpdated();
         }
 
-        __instance.SomeColorUpdated();
-    }
+        private static void LogMessage(object data)
+        {
+            Logger.LogMessage($"{data}");
+        }
 
-    private static void LogMessage(object data)
-    {
-        Logger.LogMessage($"{data}");
-    }
+        private static void LogWarning(object data)
+        {
+            Logger.LogWarning($"{data}");
+        }
 
-    private static void LogWarning(object data)
-    {
-        Logger.LogWarning($"{data}");
-    }
+        private static void LogError(object data)
+        {
+            Logger.LogError($"{data}");
+        }
 
-    private static void LogError(object data)
-    {
-        Logger.LogError($"{data}");
+        #endregion
     }
-
-    #endregion
 }

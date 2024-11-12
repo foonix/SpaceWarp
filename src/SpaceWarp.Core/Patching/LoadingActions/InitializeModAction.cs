@@ -1,32 +1,34 @@
 using KSP.Game.Flow;
 using SpaceWarp.API.Mods;
+using System;
 
-namespace SpaceWarp.Patching.LoadingActions;
-
-internal sealed class InitializeModAction : FlowAction
+namespace SpaceWarp.Patching.LoadingActions
 {
-    private readonly SpaceWarpPluginDescriptor _plugin;
-
-    public InitializeModAction(SpaceWarpPluginDescriptor plugin) : base($"Initialization for plugin {plugin.Name}")
+    internal sealed class InitializeModAction : FlowAction
     {
-        _plugin = plugin;
-    }
+        private readonly SpaceWarpPluginDescriptor _plugin;
 
-    public override void DoAction(Action resolve, Action<string> reject)
-    {
-        try
+        public InitializeModAction(SpaceWarpPluginDescriptor plugin) : base($"Initialization for plugin {plugin.Name}")
         {
-            if (_plugin.DoLoadingActions)
-            {
-                _plugin.Plugin.OnInitialized();
-            }
-
-            resolve();
+            _plugin = plugin;
         }
-        catch (Exception e)
+
+        protected override void DoAction(Action resolve, Action<string> reject)
         {
-            (_plugin.Plugin ?? SpaceWarpPlugin.Instance).SWLogger.LogError(e.ToString());
-            reject(null);
+            try
+            {
+                if (_plugin.DoLoadingActions)
+                {
+                    _plugin.Plugin.OnInitialized();
+                }
+
+                resolve();
+            }
+            catch (Exception e)
+            {
+                (_plugin.Plugin ?? SpaceWarpPlugin.Instance).SWLogger.LogError(e.ToString());
+                reject(null);
+            }
         }
     }
 }

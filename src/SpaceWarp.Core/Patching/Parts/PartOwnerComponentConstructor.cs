@@ -3,36 +3,37 @@ using HarmonyLib;
 using KSP.Sim.impl;
 using SpaceWarp.API.Parts;
 
-namespace SpaceWarp.Patching.Parts;
-
-[HarmonyPatch(typeof(PartOwnerComponent))]
-internal static class PartOwnerComponentConstructor
+namespace SpaceWarp.Patching.Parts
 {
-    private static readonly FieldInfo AddedField =
-        typeof(PartOwnerComponent).GetField("HasRegisteredPartComponentsForFixedUpdate");
-
-    [HarmonyPatch(MethodType.Constructor)]
-    // ReSharper disable once InconsistentNaming
-    private static void SetFalse(PartOwnerComponent __instance)
+    [HarmonyPatch(typeof(PartOwnerComponent))]
+    internal static class PartOwnerComponentConstructor
     {
-        AddedField.SetValue(__instance, false);
-    }
+        private static readonly FieldInfo AddedField =
+            typeof(PartOwnerComponent).GetField("HasRegisteredPartComponentsForFixedUpdate");
 
-    [HarmonyPatch(nameof(PartOwnerComponent.Add))]
-    [HarmonyPrefix]
-    // ReSharper disable once InconsistentNaming
-    private static void CheckForModule(PartOwnerComponent __instance, PartComponent part)
-    {
-        var currentValue = (bool)AddedField.GetValue(__instance);
-        if (currentValue)
+        [HarmonyPatch(MethodType.Constructor)]
+        // ReSharper disable once InconsistentNaming
+        private static void SetFalse(PartOwnerComponent __instance)
         {
-            return;
+            AddedField.SetValue(__instance, false);
         }
 
-        var hasModule = PartComponentModuleOverride.RegisteredPartComponentOverrides.Any(
-            type => part.TryGetModule(type, out _)
-        );
+        [HarmonyPatch(nameof(PartOwnerComponent.Add))]
+        [HarmonyPrefix]
+        // ReSharper disable once InconsistentNaming
+        private static void CheckForModule(PartOwnerComponent __instance, PartComponent part)
+        {
+            var currentValue = (bool)AddedField.GetValue(__instance);
+            if (currentValue)
+            {
+                return;
+            }
 
-        AddedField.SetValue(__instance, hasModule);
+            var hasModule = PartComponentModuleOverride.RegisteredPartComponentOverrides.Any(
+                type => part.TryGetModule(type, out _)
+            );
+
+            AddedField.SetValue(__instance, hasModule);
+        }
     }
 }

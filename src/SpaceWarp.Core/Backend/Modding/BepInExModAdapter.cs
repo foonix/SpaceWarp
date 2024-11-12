@@ -3,32 +3,33 @@ using SpaceWarp.API.Configuration;
 using SpaceWarp.API.Logging;
 using SpaceWarp.API.Mods;
 
-namespace SpaceWarp.Backend.Modding;
-
-internal class BepInExModAdapter : ISpaceWarpMod
+namespace SpaceWarp.Backend.Modding
 {
-    public readonly BaseUnityPlugin Plugin;
-
-    /// <inheritdoc />
-    public void OnPreInitialized()
+    internal class BepInExModAdapter : ISpaceWarpMod
     {
-    }
+        public readonly BaseUnityPlugin Plugin;
 
-    /// <inheritdoc />
-    public void OnInitialized()
-    {
-    }
+        /// <inheritdoc />
+        public void OnPreInitialized()
+        {
+        }
 
-    public void OnPostInitialized()
-    {
-    }
+        /// <inheritdoc />
+        public void OnInitialized()
+        {
+        }
 
-    public ILogger SWLogger => new BepInExLogger(Plugin.Logger);
-    public IConfigFile SWConfiguration => new BepInExConfigFile(Plugin.Config);
-    public SpaceWarpPluginDescriptor SWMetadata { get; set; }
+        public void OnPostInitialized()
+        {
+        }
 
-    public BepInExModAdapter(BaseUnityPlugin plugin)
-    {
-        Plugin = plugin;
+        public ILogger SWLogger => new BepInExLogger(Plugin.Logger);
+        public IConfigFile SWConfiguration => new BepInExConfigFile(Plugin.Config);
+        public SpaceWarpPluginDescriptor SWMetadata { get; set; }
+
+        public BepInExModAdapter(BaseUnityPlugin plugin)
+        {
+            Plugin = plugin;
+        }
     }
 }

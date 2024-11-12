@@ -1,39 +1,41 @@
 using KSP.Game.Flow;
 using SpaceWarp.API.Mods;
+using System;
 
-namespace SpaceWarp.Patching.LoadingActions;
-
-internal sealed class PreInitializeModAction : FlowAction
+namespace SpaceWarp.Patching.LoadingActions
 {
-    private readonly SpaceWarpPluginDescriptor _plugin;
-
-    public PreInitializeModAction(SpaceWarpPluginDescriptor plugin)
-        : base($"Pre-initialization for plugin {plugin.Name}")
+    internal sealed class PreInitializeModAction : FlowAction
     {
-        _plugin = plugin;
-    }
+        private readonly SpaceWarpPluginDescriptor _plugin;
 
-    public override void DoAction(Action resolve, Action<string> reject)
-    {
-        SpaceWarpPlugin.Instance.SWLogger.LogInfo($"Pre-initializing: {_plugin.Name}?");
-        try
+        public PreInitializeModAction(SpaceWarpPluginDescriptor plugin)
+            : base($"Pre-initialization for plugin {plugin.Name}")
         {
-            if (_plugin.DoLoadingActions)
-            {
-                SpaceWarpPlugin.Instance.SWLogger.LogInfo($"YES! {_plugin.Plugin}");
-                _plugin.Plugin.OnPreInitialized();
-            }
-            else
-            {
-                SpaceWarpPlugin.Instance.SWLogger.LogInfo("NO!!");
-            }
-
-            resolve();
+            _plugin = plugin;
         }
-        catch (Exception e)
+
+        protected override void DoAction(Action resolve, Action<string> reject)
         {
-            (_plugin.Plugin ?? SpaceWarpPlugin.Instance).SWLogger.LogError(e.ToString());
-            reject(null);
+            SpaceWarpPlugin.Instance.SWLogger.LogInfo($"Pre-initializing: {_plugin.Name}?");
+            try
+            {
+                if (_plugin.DoLoadingActions)
+                {
+                    SpaceWarpPlugin.Instance.SWLogger.LogInfo($"YES! {_plugin.Plugin}");
+                    _plugin.Plugin.OnPreInitialized();
+                }
+                else
+                {
+                    SpaceWarpPlugin.Instance.SWLogger.LogInfo("NO!!");
+                }
+
+                resolve();
+            }
+            catch (Exception e)
+            {
+                (_plugin.Plugin ?? SpaceWarpPlugin.Instance).SWLogger.LogError(e.ToString());
+                reject(null);
+            }
         }
     }
 }

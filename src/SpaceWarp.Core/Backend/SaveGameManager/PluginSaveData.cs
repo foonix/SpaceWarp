@@ -1,28 +1,31 @@
-﻿namespace SpaceWarp.Backend.SaveGameManager;
+﻿using System;
 
-/// <summary>
-/// The delegate type that will be called when a save or load event is triggered.
-/// </summary>
-public delegate void SaveGameCallbackFunctionDelegate(object data);
-
-/// <summary>
-/// This class is used to store your mod data for saving and loading.
-/// </summary>
-[Serializable]
-public class PluginSaveData
+namespace SpaceWarp.Backend.SaveGameManager
 {
     /// <summary>
-    /// The GUID of your mod
+    /// The delegate type that will be called when a save or load event is triggered.
     /// </summary>
-    public string ModGuid { get; set; }
+    public delegate void SaveGameCallbackFunctionDelegate(object data);
 
     /// <summary>
-    /// The data that will be saved
+    /// This class is used to store your mod data for saving and loading.
     /// </summary>
-    public object SaveData { get; set; }
+    [Serializable]
+    public class PluginSaveData
+    {
+        /// <summary>
+        /// The GUID of your mod
+        /// </summary>
+        public string ModGuid { get; set; }
 
-    [NonSerialized]
-    internal SaveGameCallbackFunctionDelegate SaveEventCallback;
-    [NonSerialized]
-    internal SaveGameCallbackFunctionDelegate LoadEventCallback;
+        /// <summary>
+        /// The data that will be saved
+        /// </summary>
+        public object SaveData { get; set; }
+
+        [NonSerialized]
+        internal SaveGameCallbackFunctionDelegate SaveEventCallback;
+        [NonSerialized]
+        internal SaveGameCallbackFunctionDelegate LoadEventCallback;
+    }
 }

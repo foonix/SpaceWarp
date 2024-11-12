@@ -1,0 +1,21 @@
+{
+  "name": "com.github.x606.spacewarp",
+  "version": "1.9.5",
+  "displayName": "Space Warp",
+  "description": "Space Warp is an API for KSP 2 mod developers.",
+  "unity": "2022.3",
+  "unityRelease": "5f1",
+  "documentationUrl": "https://docs.spacewarp.org/en/latest/",
+  "changelogUrl": "https://github.com/SpaceWarpDev/SpaceWarp/releases",
+  "licensesUrl": "https://github.com/SpaceWarpDev/SpaceWarp/blob/main/LICENSE",
+  "dependencies": {
+	  "com.unity.addressables": "1.21",
+	  "com.unity.nuget.newtonsoft-json": "3.2"
+  },
+ "keywords": [
+  ],
+  "author": {
+    "name": "Space Warp Team",
+    "url": "https://spacewarp.org"
+  }
+}

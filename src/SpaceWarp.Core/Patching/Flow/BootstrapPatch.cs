@@ -6,132 +6,135 @@ using SpaceWarp.API.Loading;
 using SpaceWarp.API.Mods;
 using SpaceWarp.Backend.Modding;
 using SpaceWarp.Patching.LoadingActions;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace SpaceWarp.Patching.Flow;
-
-[HarmonyPatch]
-internal static class BootstrapPatch
+namespace SpaceWarp.Patching.Flow
 {
-    internal static bool ForceSpaceWarpLoadDueToError = false;
-    internal static SpaceWarpPluginDescriptor ErroredSWPluginDescriptor;
-
-    [HarmonyPatch(typeof(GameManager), nameof(GameManager.Awake))]
-    [HarmonyPrefix]
-    private static void GetAllMods()
+    [HarmonyPatch]
+    internal static class BootstrapPatch
     {
-        PluginRegister.RegisterAllMods();
-        PluginList.ResolveDependenciesAndLoadOrder();
-    }
+        internal static bool ForceSpaceWarpLoadDueToError = false;
+        internal static SpaceWarpPluginDescriptor ErroredSWPluginDescriptor;
 
-    [HarmonyPatch(typeof(GameManager), nameof(GameManager.StartBootstrap))]
-    [HarmonyILManipulator]
-    private static void PatchInitializationsIL(ILContext ilContext, ILLabel endLabel)
-    {
-        ILCursor ilCursor = new(ilContext);
-
-        var flowProp = AccessTools.DeclaredProperty(typeof(GameManager), nameof(GameManager.LoadingFlow));
-
-        ilCursor.GotoNext(
-            MoveType.After,
-            instruction => instruction.MatchCallOrCallvirt(flowProp.SetMethod)
-        );
-
-        ilCursor.EmitDelegate(InjectBeforeGameLoadMethods);
-
-        ilCursor.GotoLabel(endLabel, MoveType.Before);
-        ilCursor.Index -= 1;
-        ilCursor.EmitDelegate(InjectAfterGameLoadMethods);
-    }
-
-    private static void InjectAfterGameLoadMethods()
-    {
-        var flow = GameManager.Instance.LoadingFlow;
-        var allPlugins = GetAllPlugins();
-
-        LatePreinitialize(allPlugins);
-        DoLoadingActions(allPlugins, flow);
-        foreach (var actionGenerator in Loading.GeneralLoadingActions)
+        [HarmonyPatch(typeof(GameManager), nameof(GameManager.Awake))]
+        [HarmonyPrefix]
+        private static void GetAllMods()
         {
-            flow.AddAction(actionGenerator());
+            PluginRegister.RegisterAllMods();
+            PluginList.ResolveDependenciesAndLoadOrder();
         }
 
-        foreach (var plugin in allPlugins)
+        [HarmonyPatch(typeof(GameManager), nameof(GameManager.StartBootstrap))]
+        [HarmonyILManipulator]
+        private static void PatchInitializationsIL(ILContext ilContext, ILLabel endLabel)
         {
-            flow.AddAction(new InitializeModAction(plugin));
+            ILCursor ilCursor = new(ilContext);
+
+            var flowProp = AccessTools.DeclaredProperty(typeof(GameManager), nameof(GameManager.LoadingFlow));
+
+            ilCursor.GotoNext(
+                MoveType.After,
+                instruction => instruction.MatchCallOrCallvirt(flowProp.SetMethod)
+            );
+
+            ilCursor.EmitDelegate(InjectBeforeGameLoadMethods);
+
+            ilCursor.GotoLabel(endLabel, MoveType.Before);
+            ilCursor.Index -= 1;
+            ilCursor.EmitDelegate(InjectAfterGameLoadMethods);
         }
 
-        foreach (var plugin in allPlugins)
+        private static void InjectAfterGameLoadMethods()
         {
-            flow.AddAction(new LoadLuaAction(plugin));
-        }
+            var flow = GameManager.Instance.LoadingFlow;
+            var allPlugins = GetAllPlugins();
 
-        foreach (var plugin in allPlugins)
-        {
-            flow.AddAction(new PostInitializeModAction(plugin));
-        }
-    }
-
-    private static void DoLoadingActions(IList<SpaceWarpPluginDescriptor> allPlugins, SequentialFlow flow)
-    {
-        foreach (var plugin in allPlugins)
-        {
-            flow.AddAction(new LoadAddressablesAction(plugin));
-            flow.AddAction(new LoadLocalizationAction(plugin));
-            DoOldStyleLoadingActions(flow, plugin);
-
-            foreach (var action in Loading.DescriptorLoadingActionGenerators)
+            LatePreinitialize(allPlugins);
+            DoLoadingActions(allPlugins, flow);
+            foreach (var actionGenerator in Loading.GeneralLoadingActions)
             {
-                flow.AddAction(action(plugin));
+                flow.AddAction(actionGenerator());
+            }
+
+            foreach (var plugin in allPlugins)
+            {
+                flow.AddAction(new InitializeModAction(plugin));
+            }
+
+            foreach (var plugin in allPlugins)
+            {
+                flow.AddAction(new LoadLuaAction(plugin));
+            }
+
+            foreach (var plugin in allPlugins)
+            {
+                flow.AddAction(new PostInitializeModAction(plugin));
             }
         }
-    }
 
-    private static void DoOldStyleLoadingActions(SequentialFlow flow, SpaceWarpPluginDescriptor plugin)
-    {
-        if (plugin.Plugin is not BaseSpaceWarpPlugin baseSpaceWarpPlugin) return;
-        foreach (var action in Loading.LoadingActionGenerators)
+        private static void DoLoadingActions(IList<SpaceWarpPluginDescriptor> allPlugins, SequentialFlow flow)
         {
-            flow.AddAction(action(baseSpaceWarpPlugin));
-        }
-    }
+            foreach (var plugin in allPlugins)
+            {
+                flow.AddAction(new LoadAddressablesAction(plugin));
+                flow.AddAction(new LoadLocalizationAction(plugin));
+                DoOldStyleLoadingActions(flow, plugin);
 
-    private static void LatePreinitialize(IList<SpaceWarpPluginDescriptor> allPlugins)
-    {
-        foreach (var plugin in allPlugins.Where(plugin => plugin.LatePreInitialize))
-        {
-            GameManager.Instance.LoadingFlow.AddAction(new PreInitializeModAction(plugin));
-        }
-    }
-
-    private static IList<SpaceWarpPluginDescriptor> GetAllPlugins()
-    {
-        IList<SpaceWarpPluginDescriptor> allPlugins;
-        if (ForceSpaceWarpLoadDueToError)
-        {
-            var list = new List<SpaceWarpPluginDescriptor> { ErroredSWPluginDescriptor };
-            list.AddRange(PluginList.AllEnabledAndActivePlugins);
-            allPlugins = list;
-        }
-        else
-        {
-            allPlugins = PluginList.AllPlugins.ToList();
+                foreach (var action in Loading.DescriptorLoadingActionGenerators)
+                {
+                    flow.AddAction(action(plugin));
+                }
+            }
         }
 
-        return allPlugins;
-    }
-
-    private static void InjectBeforeGameLoadMethods()
-    {
-        if (ForceSpaceWarpLoadDueToError)
+        private static void DoOldStyleLoadingActions(SequentialFlow flow, SpaceWarpPluginDescriptor plugin)
         {
-            GameManager.Instance.LoadingFlow.AddAction(new PreInitializeModAction(ErroredSWPluginDescriptor));
+            if (plugin.Plugin is not BaseSpaceWarpPlugin baseSpaceWarpPlugin) return;
+            foreach (var action in Loading.LoadingActionGenerators)
+            {
+                flow.AddAction(action(baseSpaceWarpPlugin));
+            }
         }
 
-        foreach (var plugin in PluginList.AllEnabledAndActivePlugins)
+        private static void LatePreinitialize(IList<SpaceWarpPluginDescriptor> allPlugins)
         {
-            if (plugin.Plugin != null && !plugin.LatePreInitialize)
+            foreach (var plugin in allPlugins.Where(plugin => plugin.LatePreInitialize))
             {
                 GameManager.Instance.LoadingFlow.AddAction(new PreInitializeModAction(plugin));
+            }
+        }
+
+        private static IList<SpaceWarpPluginDescriptor> GetAllPlugins()
+        {
+            IList<SpaceWarpPluginDescriptor> allPlugins;
+            if (ForceSpaceWarpLoadDueToError)
+            {
+                var list = new List<SpaceWarpPluginDescriptor> { ErroredSWPluginDescriptor };
+                list.AddRange(PluginList.AllEnabledAndActivePlugins);
+                allPlugins = list;
+            }
+            else
+            {
+                allPlugins = PluginList.AllPlugins.ToList();
+            }
+
+            return allPlugins;
+        }
+
+        private static void InjectBeforeGameLoadMethods()
+        {
+            if (ForceSpaceWarpLoadDueToError)
+            {
+                GameManager.Instance.LoadingFlow.AddAction(new PreInitializeModAction(ErroredSWPluginDescriptor));
+            }
+
+            foreach (var plugin in PluginList.AllEnabledAndActivePlugins)
+            {
+                if (plugin.Plugin != null && !plugin.LatePreInitialize)
+                {
+                    GameManager.Instance.LoadingFlow.AddAction(new PreInitializeModAction(plugin));
+                }
             }
         }
     }

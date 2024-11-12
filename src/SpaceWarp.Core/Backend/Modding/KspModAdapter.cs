@@ -5,32 +5,33 @@ using SpaceWarp.API.Mods;
 using UnityEngine;
 using ILogger = SpaceWarp.API.Logging.ILogger;
 
-namespace SpaceWarp.Backend.Modding;
-
-internal class KspModAdapter : MonoBehaviour, ISpaceWarpMod
+namespace SpaceWarp.Backend.Modding
 {
-    public KSP2Mod AdaptedMod;
-
-    public void OnPreInitialized()
+    internal class KspModAdapter : MonoBehaviour, ISpaceWarpMod
     {
-        AdaptedMod.modCore?.ModStart();
-        SWLogger = new UnityLogSource(AdaptedMod.ModName);
-    }
+        public KSP2Mod AdaptedMod;
 
-    public void OnInitialized()
-    {
-    }
+        public void OnPreInitialized()
+        {
+            AdaptedMod.modCore?.ModStart();
+            SWLogger = new UnityLogSource(AdaptedMod.ModName);
+        }
 
-    public void OnPostInitialized()
-    {
-    }
+        public void OnInitialized()
+        {
+        }
 
-    public void Update()
-    {
-        AdaptedMod.modCore?.ModUpdate();
-    }
+        public void OnPostInitialized()
+        {
+        }
 
-    public ILogger SWLogger { get; private set; }
-    public IConfigFile SWConfiguration => new EmptyConfigFile();
-    public SpaceWarpPluginDescriptor SWMetadata { get; set; }
+        public void Update()
+        {
+            AdaptedMod.modCore?.ModUpdate();
+        }
+
+        public ILogger SWLogger { get; private set; }
+        public IConfigFile SWConfiguration => new EmptyConfigFile();
+        public SpaceWarpPluginDescriptor SWMetadata { get; set; }
+    }
 }

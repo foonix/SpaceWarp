@@ -1,48 +1,51 @@
+using System;
+using System.Collections;
 using System.Reflection;
 using UnityEngine;
-using System.Collections;
+using UnityObject = UnityEngine.Object;
 
-namespace SpaceWarp.InternalUtilities;
-
-internal static class InternalExtensions
+namespace SpaceWarp.InternalUtilities
 {
-    internal static void Persist(this UnityObject obj)
+    internal static class InternalExtensions
     {
-        UnityObject.DontDestroyOnLoad(obj);
-        obj.hideFlags |= HideFlags.HideAndDontSave;
-    }
-
-    internal static void CopyFieldAndPropertyDataFromSourceToTargetObject(object source, object target)
-    {
-        // check if it's a dictionary
-        if (source is IDictionary sourceDictionary && target is IDictionary targetDictionary)
+        internal static void Persist(this UnityObject obj)
         {
-            // copy dictionary items
-            foreach (DictionaryEntry entry in sourceDictionary)
-            {
-                targetDictionary[entry.Key] = entry.Value;
-            }
+            UnityObject.DontDestroyOnLoad(obj);
+            obj.hideFlags |= HideFlags.HideAndDontSave;
         }
-        else
+
+        internal static void CopyFieldAndPropertyDataFromSourceToTargetObject(object source, object target)
         {
-            // copy fields
-            foreach (FieldInfo field in source.GetType().GetFields())
+            // check if it's a dictionary
+            if (source is IDictionary sourceDictionary && target is IDictionary targetDictionary)
             {
-                object value = field.GetValue(source);
-
-                try
+                // copy dictionary items
+                foreach (DictionaryEntry entry in sourceDictionary)
                 {
-                    field.SetValue(target, value);
+                    targetDictionary[entry.Key] = entry.Value;
                 }
-                catch (FieldAccessException)
-                { /* some fields are constants */ }
             }
-
-            // copy properties
-            foreach (PropertyInfo property in source.GetType().GetProperties())
+            else
             {
-                object value = property.GetValue(source);
-                property.SetValue(target, value);
+                // copy fields
+                foreach (FieldInfo field in source.GetType().GetFields())
+                {
+                    object value = field.GetValue(source);
+
+                    try
+                    {
+                        field.SetValue(target, value);
+                    }
+                    catch (FieldAccessException)
+                    { /* some fields are constants */ }
+                }
+
+                // copy properties
+                foreach (PropertyInfo property in source.GetType().GetProperties())
+                {
+                    object value = property.GetValue(source);
+                    property.SetValue(target, value);
+                }
             }
         }
     }

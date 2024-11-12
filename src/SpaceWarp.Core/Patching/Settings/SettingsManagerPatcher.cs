@@ -1,19 +1,22 @@
 ﻿using HarmonyLib;
 using KSP.UI;
+using System.Collections.Generic;
 
-namespace SpaceWarp.Patching.Settings;
-[HarmonyPatch]
-internal static class SettingsManagerPatcher
+namespace SpaceWarp.Patching.Settings
 {
-    internal static readonly List<SettingsSubMenu> AllExtrasSettingsMenus = new();
-
-    [HarmonyPatch(typeof(SettingsMenuManager), nameof(SettingsMenuManager.ResetAllSettings))]
-    [HarmonyPostfix]
-    internal static void ResetModsMenu()
+    [HarmonyPatch]
+    internal static class SettingsManagerPatcher
     {
-        foreach (var menu in AllExtrasSettingsMenus.Where(menu => menu != null))
+        internal static readonly List<SettingsSubMenu> AllExtrasSettingsMenus = new();
+
+        [HarmonyPatch(typeof(SettingsMenuManager), nameof(SettingsMenuManager.ResetAllSettings))]
+        [HarmonyPostfix]
+        internal static void ResetModsMenu()
         {
-            menu.Revert();
+            foreach (var menu in AllExtrasSettingsMenus.Where(menu => menu != null))
+            {
+                menu.Revert();
+            }
         }
     }
 }

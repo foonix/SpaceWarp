@@ -3,28 +3,29 @@ using SpaceWarp.API.Configuration;
 using SpaceWarp.API.Logging;
 using SpaceWarp.API.Mods;
 
-namespace SpaceWarp.Backend.Modding;
-
-internal class AssetOnlyMod : ISpaceWarpMod
+namespace SpaceWarp.Backend.Modding
 {
-    public AssetOnlyMod(string name)
+    internal class AssetOnlyMod : ISpaceWarpMod
     {
-        SWLogger = new BepInExLogger(new ManualLogSource(name));
-    }
+        public AssetOnlyMod(string name)
+        {
+            SWLogger = new BepInExLogger(new ManualLogSource(name));
+        }
 
-    public void OnPreInitialized()
-    {
-    }
+        public void OnPreInitialized()
+        {
+        }
 
-    public void OnInitialized()
-    {
-    }
+        public void OnInitialized()
+        {
+        }
 
-    public void OnPostInitialized()
-    {
-    }
+        public void OnPostInitialized()
+        {
+        }
 
-    public ILogger SWLogger { get; }
-    public IConfigFile SWConfiguration => new EmptyConfigFile();
-    public SpaceWarpPluginDescriptor SWMetadata { get; set; }
+        public ILogger SWLogger { get; }
+        public IConfigFile SWConfiguration => new EmptyConfigFile();
+        public SpaceWarpPluginDescriptor SWMetadata { get; set; }
+    }
 }
