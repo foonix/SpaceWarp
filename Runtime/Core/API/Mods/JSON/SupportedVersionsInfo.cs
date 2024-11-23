@@ -24,12 +24,12 @@ public sealed class SupportedVersionsInfo
     /// <summary>
     /// The minimum supported version of KSP2.
     /// </summary>
-    [JsonProperty("min")] public string Min { get; internal set; } = DefaultMin;
+    [JsonProperty("min")] public string Min { get; set; } = DefaultMin;
 
     /// <summary>
     /// The maximum supported version of KSP2.
     /// </summary>
-    [JsonProperty("max")] public string Max { get; internal set; } = DefaultMax;
+    [JsonProperty("max")] public string Max { get; set; } = DefaultMax;
 
     /// <summary>
     /// Checks if the given version is supported by this mod.

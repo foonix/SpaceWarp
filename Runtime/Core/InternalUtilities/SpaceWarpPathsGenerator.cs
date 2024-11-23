@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
-using PlasticGui;
 using SpaceWarp.API;
 
 namespace SpaceWarp.InternalUtilities;

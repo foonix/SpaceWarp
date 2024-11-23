@@ -84,7 +84,7 @@ public sealed class ModInfo
     /// The KSP2 versions supported by the mod.
     /// </summary>
     [JsonProperty("ksp2_version", Required = Required.DisallowNull)]
-    public SupportedVersionsInfo SupportedKsp2Versions { get; internal set; } = new()
+    public SupportedVersionsInfo SupportedKsp2Versions { get; set; } = new()
     {
         Min = "*",
         Max = "*"

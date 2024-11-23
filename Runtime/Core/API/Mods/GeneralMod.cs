@@ -9,11 +9,11 @@ public abstract class GeneralMod : ISpaceWarpMod
     {
     }
 
-    public void OnInitialized()
+    public virtual void OnInitialized()
     {
     }
 
-    public void OnPostInitialized()
+    public virtual void OnPostInitialized()
     {
     }
 

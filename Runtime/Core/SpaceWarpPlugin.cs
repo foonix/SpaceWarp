@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using ReduxLib.GameInterfaces;
 using SpaceWarp.API;
@@ -8,15 +7,15 @@ using SpaceWarp.API.Loading;
 using SpaceWarp.API.Mods;
 using SpaceWarp.API.Mods.JSON;
 using SpaceWarp.InternalUtilities;
+using SpaceWarp.Modules;
 using SpaceWarp.Patching.LoadingActions;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using ILogger = ReduxLib.Logging.ILogger;
 
 namespace SpaceWarp;
 
-public sealed class SpaceWarpPlugin : MonoBehaviourMod
+public sealed class SpaceWarpPlugin : GeneralMod
 {
     /// <summary>
     /// SpaceWarp plugin instance.
@@ -54,6 +53,7 @@ public sealed class SpaceWarpPlugin : MonoBehaviourMod
     private static void CreateMonoBehaviours()
     {
         Logger = ReduxLib.ReduxLib.GetLogger("Space Warp");
+        ModuleManager.LoadAllModules();
         PluginRegister.RegisterAllMods();
         PluginList.ResolveDependenciesAndLoadOrder();
         PluginList.LoadAllMods();
@@ -132,6 +132,21 @@ public sealed class SpaceWarpPlugin : MonoBehaviourMod
         Patchers = new List<string>(),
         MainAssembly = null
     };
+
+    public override void OnPreInitialized()
+    {
+        ModuleManager.PreInitializeAllModules();
+    }
+
+    public override void OnInitialized()
+    {
+        ModuleManager.InitializeAllModules();
+    }
+
+    public override void OnPostInitialized()
+    {
+        ModuleManager.PostInitializeAllModules();
+    }
 
     #region Space Warp Loading Actions
 

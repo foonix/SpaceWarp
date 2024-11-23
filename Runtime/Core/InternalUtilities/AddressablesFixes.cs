@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using PlasticPipe.Server;
 using UnityEngine.ResourceManagement.ResourceLocations;
-using UnityEngine.ResourceManagement.ResourceProviders;
 
 namespace SpaceWarp.InternalUtilities;
 
@@ -21,7 +19,7 @@ internal static class AddressablesFixes
     
     internal static string RedirectInternalIdsToGameDirectoryFixed(IResourceLocation location)
     {
-        if (location.InternalId.Contains("Mods")) return location.InternalId;
+        if (location.InternalId.Contains("Mods") || location.InternalId.Contains("Redux/Addressables")) return location.InternalId;
         return (string)OriginalThunderkitMethod.Invoke(null, new object[] {location});
     }
 }
