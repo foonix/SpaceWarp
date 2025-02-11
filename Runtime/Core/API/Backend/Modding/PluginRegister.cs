@@ -183,7 +183,7 @@ internal static class PluginRegister
 
                 foreach (var type in asm.GetTypes())
                 {
-                    if (!type.IsSubclassOf(typeof(ISpaceWarpMod)) || type.IsAbstract) continue;
+                    if (!typeof(ISpaceWarpMod).IsAssignableFrom(type) || type.IsAbstract) continue;
                     swMod = new UnloadedMod(type);
                     break;
                 }
@@ -204,7 +204,7 @@ internal static class PluginRegister
             );
             swMod.SWMetadata = descriptor;
 
-            Logger.LogInfo($"Attempting to register codeless mod: {swinfoData.ModID}, {swinfoData.Name}");
+            Logger.LogInfo($"Attempting to register mod: {swinfoData.ModID}, {swinfoData.Name}");
 
             if (PluginList.AllPlugins.Any(
                     x => string.Equals(x.Guid, swinfoData.ModID, StringComparison.InvariantCultureIgnoreCase)

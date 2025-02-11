@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using SpaceWarp.API.Backend.Modding;
 using SpaceWarp.API.Mods.JSON;
 using SpaceWarp.API.Versions;
+using UnityEngine;
 
 namespace SpaceWarp.API.Mods;
 
@@ -327,7 +328,7 @@ public static class PluginList
         {
             if (mod.Plugin is UnloadedMod unloadedMod)
             {
-                unloadedMod.Load();
+                mod.Plugin = unloadedMod.Load();
             }
         }
     }

@@ -27,6 +27,7 @@ public static class Appbar
     /// <param name="func">The function to be called when this button is clicked</param>
     public static void RegisterAppButton(string text, string id, Sprite icon, Action<bool> func)
     {
+        SpaceWarpPlugin.Instance.SWLogger.LogInfo($"RegisterAppButton: {text}, {id}");
         ButtonsToBeLoaded.Add((text, icon, id, func));
     }
 
@@ -52,6 +53,7 @@ public static class Appbar
     // ReSharper disable once InconsistentNaming
     public static void RegisterOABAppButton(string text, string id, Sprite icon, Action<bool> func)
     {
+        SpaceWarpPlugin.Instance.SWLogger.LogInfo($"RegisterOABAppButton: {text}, {id}");
         OabButtonsToBeLoaded.Add((text, icon, id, func));
     }
 
