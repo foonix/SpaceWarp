@@ -96,7 +96,7 @@ public class VersionChecking : SpaceWarpModule
             .GetTypes()
             .First(type => type.FullName == "SpaceWarp.Modules.UI")
             .GetField("Instance", BindingFlags.Static | BindingFlags.NonPublic)
-            ?.GetValue(null);
+            ?.GetValue(null)!;
 
         var modListControllerField = uiModule
             ?.GetType()
