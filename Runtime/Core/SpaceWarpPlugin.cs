@@ -74,10 +74,6 @@ public sealed class SpaceWarpPlugin : GeneralMod
     }
     private static void SetupAfterGameLoadActions()
     {
-        foreach (var actionGenerator in Loading.GeneralLoadingActions)
-        {
-            AfterGameLoadActions.Add(actionGenerator());
-        }
 
         foreach (var plugin in PluginList.AllEnabledAndActivePlugins)
         {
@@ -91,6 +87,11 @@ public sealed class SpaceWarpPlugin : GeneralMod
             {
                 AfterGameLoadActions.Add(action(plugin));
             }
+        }
+        
+        foreach (var actionGenerator in Loading.GeneralLoadingActions)
+        {
+            AfterGameLoadActions.Add(actionGenerator());
         }
         
         foreach (var plugin in PluginList.AllEnabledAndActivePlugins)
