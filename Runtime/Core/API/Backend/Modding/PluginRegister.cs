@@ -7,8 +7,6 @@ using ReduxLib.Configuration;
 using ReduxLib.Logging;
 using SpaceWarp.API.Mods;
 using SpaceWarp.API.Mods.JSON;
-using UnityEditor.VersionControl;
-
 namespace SpaceWarp.API.Backend.Modding;
 
 internal static class PluginRegister
