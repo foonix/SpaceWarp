@@ -7,6 +7,7 @@ using ReduxLib.Configuration;
 using ReduxLib.Logging;
 using SpaceWarp.API.Mods;
 using SpaceWarp.API.Mods.JSON;
+using UnityEditor.VersionControl;
 
 namespace SpaceWarp.API.Backend.Modding;
 
@@ -18,8 +19,20 @@ internal static class PluginRegister
     public static void RegisterAllMods()
     {
         RegisterSpaceWarp();
+        RegisterInternalMods();
         RegisterMods();
         DisableMods();
+    }
+
+    private static void RegisterInternalMods()
+    {
+        foreach (var mod in IInternalModRegister.Instance.InternalPluginDescriptors)
+        {
+            mod.Plugin.SWLogger ??= ReduxLib.ReduxLib.GetLogger(mod.Guid);
+            mod.Plugin.SWConfiguration = mod.ConfigFile = new JsonConfigFile(Path.Combine(mod.Folder.FullName,"config.json"));
+            mod.IsCore = true;
+            PluginList.RegisterPlugin(mod);
+        }
     }
 
 
@@ -125,6 +138,7 @@ internal static class PluginRegister
             SpaceWarpPlugin.SpaceWarpModInfo.ModID, SpaceWarpPlugin.SpaceWarpModInfo.Name,
             SpaceWarpPlugin.SpaceWarpModInfo, new DirectoryInfo(ReduxLib.ReduxLib.REDUX_FOLDER), true, ReduxLib.ReduxLib.ReduxCoreConfig);
         mod.SWMetadata = descriptor;
+        descriptor.IsCore = true;
         PluginList.RegisterPlugin(descriptor);
     }
     private static void RegisterMods()

@@ -89,4 +89,9 @@ public class SpaceWarpPluginDescriptor
     /// Whether or not the plugin has been pre-initialized yet.
     /// </summary>
     public bool LatePreInitialize;
+
+    /// <summary>
+    /// Is this a core mod (as in which part of the mod list does it go into)
+    /// </summary>
+    public bool IsCore;
 }

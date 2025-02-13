@@ -40,7 +40,6 @@ internal class ModListItemController
 
     internal List<string> Conflicts { get; private set; } = new();
 
-
     internal void SetInfo(SpaceWarpPluginDescriptor info)
     {
         Info = info;

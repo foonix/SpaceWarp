@@ -20,12 +20,14 @@ internal class UnloadedMod : ISpaceWarpMod
         if (ToLoad.IsSubclassOf(typeof(MonoBehaviour)))
         {
             var modObject = ReduxLib.ReduxLib.GetAlwaysLoadedObject(SWMetadata.Guid);
+            modObject.SetActive(false);
             var mb = modObject.AddComponent(ToLoad);
             var mod = (ISpaceWarpMod)mb;
             mod.SWLogger = SWLogger;
             mod.SWConfiguration = SWConfiguration;
             mod.SWMetadata = SWMetadata;
             SWMetadata.Plugin = mod;
+            modObject.SetActive(true);
             return mod;
         }
         else

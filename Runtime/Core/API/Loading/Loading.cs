@@ -18,10 +18,10 @@ namespace SpaceWarp.API.Loading;
 [PublicAPI]
 public static class Loading
 {
-    internal static List<Func<SpaceWarpPluginDescriptor, DescriptorLoadingAction>> DescriptorLoadingActionGenerators =
+    public static List<Func<SpaceWarpPluginDescriptor, DescriptorLoadingAction>> DescriptorLoadingActionGenerators =
         new();
 
-    internal static List<Func<IFlowAction>> GeneralLoadingActions = new();
+    public static List<Func<IFlowAction>> GeneralLoadingActions = new();
 
     /// <summary>
     /// Registers a per mod loading action (but more general). Should be added either on Awake() or Start().

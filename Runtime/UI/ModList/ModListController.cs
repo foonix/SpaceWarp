@@ -95,11 +95,6 @@ internal class ModListController : MonoBehaviour
 
     private EventCallback<ChangeEvent<bool>> _lastDetailsFoldoutCallback;
 
-    private static readonly IReadOnlyList<string> NoToggleGuids = new List<string>
-    {
-        "com.github.x606.spacewarp",
-    };
-
     internal void AddMainMenuItem()
     {
         string term;
@@ -241,7 +236,7 @@ internal class ModListController : MonoBehaviour
     {
         foreach (var plugin in PluginList.AllEnabledAndActivePlugins)
         {
-            if (NoToggleGuids.Contains(plugin.Guid))
+            if (plugin.IsCore)
             {
                 MakeListItem(_coreModList, data =>
                 {
@@ -303,14 +298,14 @@ internal class ModListController : MonoBehaviour
     private void SetupToggles()
     {
         _initialToggles = PluginList.AllPlugins.Where(
-            item => !NoToggleGuids.Contains(item.Guid)
+            item => !item.IsCore
         ).ToDictionary(item => item.Guid,
             item => !PluginList.AllDisabledPlugins.Any(x =>
                 string.Equals(item.Guid, x.Guid, StringComparison.InvariantCultureIgnoreCase)));
         _toggles = new Dictionary<string, bool>(_initialToggles);
         UpdateToggles();
 
-        var noToggleElements = _modItemElements.Where(pair => NoToggleGuids.Contains(pair.Key));
+        var noToggleElements = _modItemElements.Where(pair => PluginList.TryGetDescriptor(pair.Key).IsCore);
         foreach (var pair in noToggleElements)
         {
             pair.Value.Q<Toggle>().RemoveFromHierarchy();
@@ -329,7 +324,7 @@ internal class ModListController : MonoBehaviour
 
         _disableAllButton.RegisterCallback<ClickEvent>(_ =>
         {
-            _toggles = _toggles.Select(kv => (key: kv.Key, value: NoToggleGuids.Contains(kv.Key)))
+            _toggles = _toggles.Select(kv => (key: kv.Key, value: PluginList.TryGetDescriptor(kv.Key).IsCore))
                 .ToDictionary(x => x.key, x => x.value);
             UpdateToggles();
             UpdateChangesLabel();
@@ -415,7 +410,7 @@ internal class ModListController : MonoBehaviour
             BoundItems[data.Guid] = data;
         }
 
-        if (!NoToggleGuids.Contains(data.Guid))
+        if (!data.Info.IsCore)
         {
             _toggleButtons[data.Guid!] = element.Q<Toggle>();
             element.Q<Toggle>().RegisterCallback<ChangeEvent<bool>>(evt =>
@@ -710,7 +705,7 @@ internal class ModListController : MonoBehaviour
     {
         foreach (var element in _modItemElements.Values)
         {
-            if (element.userData is not ModListItemController data || NoToggleGuids.Contains(data.Guid))
+            if (element.userData is not ModListItemController data || data.Info.IsCore)
             {
                 continue;
             }
