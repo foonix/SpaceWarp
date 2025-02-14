@@ -51,7 +51,7 @@ internal static class SpaceWarpPathsGenerator
         var modBuilder = builder.DefineDynamicModule("main");
         var typeBuilder = modBuilder.DefineType("SpaceWarpPaths", TypeAttributes.Public | TypeAttributes.Class);
         
-        var allSwinfoPaths = new DirectoryInfo(CommonPaths.MODS_FOLDER)
+        var allSwinfoPaths = new DirectoryInfo(CommonPaths.ModsFolder)
             .EnumerateFiles("swinfo.json", SearchOption.AllDirectories)
             .Where(x => IsDisabled(x, ModList.DisabledPluginGuids));
 

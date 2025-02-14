@@ -107,7 +107,7 @@ internal static class PluginRegister
     
     private static void RegisterMods()
     {
-        var pluginPath = new DirectoryInfo(CommonPaths.MODS_FOLDER);
+        var pluginPath = new DirectoryInfo(CommonPaths.ModsFolder);
         if (!pluginPath.Exists)
         {
             pluginPath.Create();

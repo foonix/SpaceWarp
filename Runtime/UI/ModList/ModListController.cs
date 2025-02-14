@@ -380,7 +380,7 @@ internal class ModListController : MonoBehaviour
             var explorer = new Process();
             explorer.StartInfo = new ProcessStartInfo("explorer.exe")
             {
-                Arguments = $"\"{CommonPaths.MODS_FOLDER}\""
+                Arguments = $"\"{CommonPaths.ModsFolder}\""
             };
             explorer.Start();
         });
@@ -743,7 +743,7 @@ internal class ModListController : MonoBehaviour
     private void UpdateDisabledFile()
     {
         File.WriteAllLines(
-            CommonPaths.DISABLED_PLUGINS,
+            CommonPaths.DisabledPlugins,
             _toggles.Where(item => !item.Value).Select(item => item.Key)
         );
     }

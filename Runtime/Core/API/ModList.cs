@@ -20,30 +20,30 @@ internal static class ModList
 
     internal static void Initialize()
     {
-        if (!File.Exists(CommonPaths.DISABLED_PLUGINS))
+        if (!File.Exists(CommonPaths.DisabledPlugins))
         {
-            File.Create(CommonPaths.DISABLED_PLUGINS).Dispose();
+            File.Create(CommonPaths.DisabledPlugins).Dispose();
         }
 
-        DisabledPluginGuids = File.ReadAllLines(CommonPaths.DISABLED_PLUGINS);
+        DisabledPluginGuids = File.ReadAllLines(CommonPaths.DisabledPlugins);
 
         var oldHash = "";
-        if (File.Exists(CommonPaths.HASH_LOCATION))
+        if (File.Exists(CommonPaths.HashLocation))
         {
-            oldHash = File.ReadAllText(CommonPaths.HASH_LOCATION);
-            File.Delete(CommonPaths.HASH_LOCATION);
+            oldHash = File.ReadAllText(CommonPaths.HashLocation);
+            File.Delete(CommonPaths.HashLocation);
         }
 
-        var newHash = File.ReadAllText(CommonPaths.DISABLED_PLUGINS);
+        var newHash = File.ReadAllText(CommonPaths.DisabledPlugins);
 
-        foreach (var swinfo in Directory.GetFiles(CommonPaths.MODS_FOLDER, "swinfo.json", SearchOption.AllDirectories))
+        foreach (var swinfo in Directory.GetFiles(CommonPaths.ModsFolder, "swinfo.json", SearchOption.AllDirectories))
         {
             newHash += File.ReadAllText(swinfo);
         }
 
         newHash = GetHash(newHash);
         
-        File.WriteAllText(CommonPaths.HASH_LOCATION, newHash);
+        File.WriteAllText(CommonPaths.HashLocation, newHash);
 
         ChangedSinceLastRun = newHash != oldHash;
     }
