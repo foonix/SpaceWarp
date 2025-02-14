@@ -21,7 +21,7 @@ public static class CommonPaths
 // // #endif
     public static string ModsFolder = "Assets/Mods";
     public static string DisabledPlugins = "disabled_plugins.cfg";
-    public static string HashLocation = "mod_list_has.txt";
+    public static string HashLocation = "mod_list_hash.txt";
 
     static CommonPaths()
     {
