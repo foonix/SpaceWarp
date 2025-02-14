@@ -13,11 +13,7 @@ public interface IInternalModRegister
 
     static DirectoryInfo GetFolder(string guid)
     {
-        #if UNITY_EDITOR
-        var path = $"Assets/{guid}";
-        #else
         var path = $"./Redux/{guid}";
-        #endif
         var info = new DirectoryInfo(path);
         if (!info.Exists) info.Create();
         return info;
