@@ -90,41 +90,6 @@ internal static class PluginRegister
         return true;
     }
 
-    private static void RegisterSingleSpaceWarpPlugin(ISpaceWarpMod plugin, string folderPath)
-    {
-
-        if (!AssertFolderPath(plugin, folderPath))
-        {
-            return;
-        }
-
-        var modInfoPath = Path.Combine(folderPath!, "swinfo.json");
-
-        if (!AssertModInfoExistence(plugin, modInfoPath, folderPath))
-        {
-            return;
-        }
-
-        if (!TryReadModInfo(plugin, modInfoPath, folderPath, out var metadata))
-        {
-            return;
-        }
-
-        var directoryInfo = new DirectoryInfo(folderPath);
-        var descriptor = new SpaceWarpPluginDescriptor(
-            plugin,
-            metadata!.ModID,
-            metadata.Name,
-            metadata,
-            directoryInfo!,
-            true,
-            plugin.SWConfiguration
-        );
-        descriptor.Plugin!.SWMetadata = descriptor;
-        
-        PluginList.RegisterPlugin(descriptor);
-    }
-
     private static void RegisterSpaceWarp()
     {
         var mod = new UnloadedMod(typeof(SpaceWarpPlugin))
@@ -139,6 +104,7 @@ internal static class PluginRegister
         descriptor.IsCore = true;
         PluginList.RegisterPlugin(descriptor);
     }
+    
     private static void RegisterMods()
     {
         var pluginPath = new DirectoryInfo(CommonPaths.MODS_FOLDER);
