@@ -36,6 +36,7 @@ internal static class ModList
 
         var newHash = File.ReadAllText(CommonPaths.DisabledPlugins);
 
+        Directory.CreateDirectory(CommonPaths.ModsFolder);
         foreach (var swinfo in Directory.GetFiles(CommonPaths.ModsFolder, "swinfo.json", SearchOption.AllDirectories))
         {
             newHash += File.ReadAllText(swinfo);
